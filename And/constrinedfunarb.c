@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define M 6       
-#define N 3
-#define snareLength 6
-#define bigLen  8 // 2 ^ 2 ^ M
-#define len 4
+#define M 10      
+#define N 5
+#define snareLength 10
+#define bigLen 32 // 2 ^ 2 ^ M
+#define len 10
 
 _Bool nondet_bool();
 unsigned int nondet_uint();
@@ -195,6 +195,18 @@ int main (int argc, char** argv)
       for  (i = 0; i < N; i++) {
 		   __CPROVER_assume(Vnodes[i] != 0);
 	   }
+
+
+           //  Make assumption that each TNodes will be differnt.    
+              for  (i = 0; i < len; i++) {
+                        for (j = 0; j < len; j++) {
+                               if ( i != j) {
+                                   __CPROVER_assume(edgeBag[i].vSnare != edgeBag[j].vSnare);
+                                      __CPROVER_assume(edgeBag[i].tSnare != edgeBag[j].tSnare);
+                                   }
+                                }
+                            }
+
 
  C1 = 1;
    for (i = 0; i < len; i++ ) {      // For each Edge  
