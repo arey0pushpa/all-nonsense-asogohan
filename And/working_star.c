@@ -52,11 +52,14 @@ struct EdgeBag
 int main (int argc, char** argv)
 
 {    
-    bigVector b0 = 0b0, b1 = 0b1 ; 
-    unsigned int pos, i, j , k, l, w, x, y;
-    unsigned int  ticks, valj, vali , calc, g , g0, gl, lastg, ng, nl, nl2 ; // basic use variable
-    unsigned int edgePos , edgeCount;  // Represent edge osition and assume use of edgeCount
-    unsigned int  vSnareChoicet[big], vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
+
+    unsigned  int j; 
+    unsigned int pos, i, k, l, w, x, y , iVal, jVal , g, g0,gl, lastg, ng,nl,nl2 ;
+    unsigned int edgePos, bagNo = 0, colorNode = 0 , minColor, cPos = 0 , tComp;
+    unsigned int  ticks, valj, vali , calc;i
+    unsigned int  edgeCount;
+    unsigned int bigVector vSnareChoicet[snareLength] , vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
+    bigVector b0 = 0b0, b1 = 0b1 ;
     _Bool Ck=0, Cf = 1, C0, C1, C2 = 1, C3 = 1, C4, C5; 
 
     bitvector Vnodes[N];
@@ -101,9 +104,6 @@ int main (int argc, char** argv)
                  edgeBag[edgePos].jth = j;      // Record the Target Node
                   
                 // Only molecule present at the nodes are allowed to fly out.
-                  __CPROVER_assume((edgeBag[edgePos].vSnare  & (~ Vnodes[i])) == 0);
-                  __CPROVER_assume((edgeBag[edgePos].tSnare  & (~ Tnodes[i])) == 0);
-                  
                   // Additional Vedge2[i][j] and Tedge2[i][j] is used to be lookup value in global steady state check condition.
                   Vedge2[i][j] = edgeBag[edgePos].vSnare;
                   Tedge2[i][j] = edgeBag[edgePos].tSnare;
@@ -277,6 +277,9 @@ int main (int argc, char** argv)
              C2 = C2 && 0;
          }
            
+         for (k = 0;k < N; k++){
+              if (k != edgeBag[i].jth){	                    
+ 			      bComp =  Tnodes[k] & onOffMatrix[k] ;   	  			       
          for (k = 0;k < N; k++){
               if (k != edgeBag[i].jth){	                    
  			      bComp =  Tnodes[k] & onOffMatrix[k] ;   	  			       
