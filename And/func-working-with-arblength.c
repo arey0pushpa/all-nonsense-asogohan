@@ -55,10 +55,9 @@ int main (int argc, char** argv)
 
     unsigned  int j; 
     unsigned int pos, i, k, l, w, x, y , iVal, jVal , g, g0,gl, lastg, ng,nl,nl2 ;
-    unsigned int edgePos, bagNo = 0, colorNode = 0 , minColor, cPos = 0 , tComp;
-    unsigned int  ticks, valj, vali , calc;i
-    unsigned int  edgeCount;
-    unsigned int bigVector vSnareChoicet[snareLength] , vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
+    unsigned int edgePos, edgeCount;
+    unsigned int  ticks, valj, vali , calc;
+    bigVector vSnareChoicet[snareLength] , vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
     bigVector b0 = 0b0, b1 = 0b1 ;
     _Bool Ck=0, Cf = 1, C0, C1, C2 = 1, C3 = 1, C4, C5; 
 
@@ -78,6 +77,16 @@ int main (int argc, char** argv)
     {1 , 1 , 0 , 0 , 0 },
     {1 , 0 , 0 , 0 , 2 },
     {0 , 1 , 0 , 0 , 0 }};
+
+
+        //  Pre-calculate the total required length(#edges) for the containerBag
+	edgeCount = 0;
+    for (i = 0; i < 1; i++) {
+        for (j = 0; j < 1; j++) {
+                        printf("just Chill");
+			} 
+    }
+
 
     struct EdgeBag edgeBag[len]; 
     
@@ -104,6 +113,9 @@ int main (int argc, char** argv)
                  edgeBag[edgePos].jth = j;      // Record the Target Node
                   
                 // Only molecule present at the nodes are allowed to fly out.
+                  __CPROVER_assume((edgeBag[edgePos].vSnare  & (~ Vnodes[i])) == 0);
+                  __CPROVER_assume((edgeBag[edgePos].tSnare  & (~ Tnodes[i])) == 0);
+                  
                   // Additional Vedge2[i][j] and Tedge2[i][j] is used to be lookup value in global steady state check condition.
                   Vedge2[i][j] = edgeBag[edgePos].vSnare;
                   Tedge2[i][j] = edgeBag[edgePos].tSnare;
@@ -113,6 +125,14 @@ int main (int argc, char** argv)
          }
     }
  
+    C0 = 1; 
+    for (j = 0; j < len; j++) {   
+         C0 = (C0 && (edgeBag[j].vSnare != 0));
+     }
+     
+      for  (i = 0; i < N; i++) {
+		   __CPROVER_assume(Vnodes[i] != 0);
+	   }
 
  C1 = 1;
    for (i = 0; i < len; i++ ) {      // For each Edge  
@@ -280,9 +300,6 @@ int main (int argc, char** argv)
          for (k = 0;k < N; k++){
               if (k != edgeBag[i].jth){	                    
  			      bComp =  Tnodes[k] & onOffMatrix[k] ;   	  			       
-         for (k = 0;k < N; k++){
-              if (k != edgeBag[i].jth){	                    
- 			      bComp =  Tnodes[k] & onOffMatrix[k] ;   	  			       
 			      for (l = 0 ; l < edgeBag[i].count; l++) {           // THIS IS DYNAMIC CODE    
 			           vf = vSnareChoicef[edgeBag[i].zebra[l]];  
 			           if ( (vf & (1 << bComp)) == 0) {
@@ -296,6 +313,42 @@ int main (int argc, char** argv)
          }
     }
     
+    for  (i = 0; i < N; i++){
+        printf("\n VNodes[%d] = %d" , i , Vnodes[i]);
+        printf(" TNodes[%d] = %d" , i , Tnodes[i]);
+        
+    }
+  
+  for  (i = 0; i < len; i++) {
+
+        printf("The edge No.%d has this config : \n There is an edge between graph[%d][%d]", i, edgeBag[i].ith, edgeBag[i].jth);
+        printf(" SourceNodes[%d] (v : t) = (%d , %d)" , edgeBag[i].ith , Vnodes[edgeBag[i].ith] , Tnodes[edgeBag[i].ith]);
+        printf(" TargetNodes[%d] (v : t) = (%d , %d) " , edgeBag[i].jth ,Vnodes[edgeBag[i].jth] , Tnodes[edgeBag[i].jth]);
+        printf (" vSnare =  %d \n tSnare = %d ", edgeBag[i].vSnare, edgeBag[i].tSnare);
+        printf (" combinedMask = %d \n counts = %d \n" ,edgeBag[i].combinedMask, edgeBag[i].count);
+   
+   }
+   
+    for  (i = 0; i < snareLength ; i++ ) {
+        printf(" vSnareChoicet[%d] = %d" , i, vSnareChoicet[i]);
+    }
+
+    for (j = 0; j < snareLength; j++) {
+               printf(" vSnareChoicef[%d] = %d" , j, vSnareChoicef[j]);
+    }
+    for (i = 0; i < N; i++){
+        printf(" The onOffMatrix[%d] = %d ", i, onOffMatrix[i]);
+    }
+
+    for(i = 0;i < N; i++) {
+        for(j = 0;j < N; j++) {
+           printf("Graph[%d][%d] = %d",i,j,graph[i][j]);
+        }
+     }
+    
+    printf("\nThe value of : \n C0 = %d \n C1 : %d \n C2 : %d , C3 : %d C4 : %d , C5 = %d \n",C0,C1,C2,C3, C4,C5);
+    printf(" the value of mr.Ticks is %d and len was %d ", ticks , len);    
+ 
  // assert(0);
   __CPROVER_assert(!(C0 && C1 && C2 && C3 && C4 && C5) , "Graph that satisfy friendZoned model exists");   
   return 0; 
