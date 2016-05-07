@@ -4,7 +4,7 @@
 #define M 10      
 #define N 5
 #define snareLength 10
-#define bigLen  1023 // 2 ^ M Possible length of the array
+#define bigLen  1023 // 2 ^ 2 ^ M
 #define len 10
 
 _Bool nondet_bool();
@@ -27,6 +27,13 @@ unsigned int zeroTon(unsigned int n) {
     return result ;
 };
 
+//bigVector biig = 0b1;
+
+bigVector nondetBV() {
+     bigVector bee;
+  //   __CPROVER_assume(bee >= 0b0 && bee <= 0b1111);  
+     return bee;
+}
 
 //  Define the Structure of the Container `
 struct EdgeBag
@@ -45,11 +52,13 @@ struct EdgeBag
 int main (int argc, char** argv)
 
 {    
-    snareVector b0 = 0b0, b1 = 0b1 ; 
-    unsigned int pos, i, j , k, l, w, x, y;
-    unsigned int  ticks, valj, vali , calc, g , g0, gl, lastg, ng, nl, nl2 ; // basic use variable
-    unsigned int edgePos , edgeCount;  // Represent edge osition and assume use of edgeCount
-    unsigned int  vSnareChoicet[bigLen], vSnareChoicef[bigLen], result, vt, vf, vl, vl2;
+
+    unsigned  int j; 
+    unsigned int pos, i, k, l, w, x, y , iVal, jVal , g, g0,gl, lastg, ng,nl,nl2 ;
+    unsigned int edgePos, edgeCount;
+    unsigned int  ticks, valj, vali , calc;
+    bigVector vSnareChoicet[snareLength] , vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
+    bigVector b0 = 0b0, b1 = 0b1 ;
     _Bool Ck=0, Cf = 1, C0, C1, C2 = 1, C3 = 1, C4, C5; 
 
     bitvector Vnodes[N];
@@ -68,6 +77,16 @@ int main (int argc, char** argv)
     {1 , 1 , 0 , 0 , 0 },
     {1 , 0 , 0 , 0 , 2 },
     {0 , 1 , 0 , 0 , 0 }};
+
+
+        //  Pre-calculate the total required length(#edges) for the containerBag
+	edgeCount = 0;
+    for (i = 0; i < 1; i++) {
+        for (j = 0; j < 1; j++) {
+                        printf("just Chill");
+			} 
+    }
+
 
     struct EdgeBag edgeBag[len]; 
     
@@ -106,6 +125,14 @@ int main (int argc, char** argv)
          }
     }
  
+    C0 = 1; 
+    for (j = 0; j < len; j++) {   
+         C0 = (C0 && (edgeBag[j].vSnare != 0));
+     }
+     
+      for  (i = 0; i < N; i++) {
+		   __CPROVER_assume(Vnodes[i] != 0);
+	   }
 
  C1 = 1;
    for (i = 0; i < len; i++ ) {      // For each Edge  
@@ -225,23 +252,30 @@ int main (int argc, char** argv)
     }   //  ith for closed 
   
 
- // Make Sure that value of VsnareChoice f and t are 0 or 1 
- // I think u need't to even care of the values
+    for  (i = 0; i < snareLength ; i++ ) {
+//         vSnareChoicet[i] = nondetBV();
+ //        __CPROVER_assume( (vSnareChoicet[i] & 0b1) == 0);
+         vSnareChoicef[i] = nondetBV();
+         __CPROVER_assume( (vSnareChoicef[i] & 0b1) == 0); 
+    }
+    
+    
    
     C2 = 1;
     C3 = 1;
-    for (i = 0; i < len; i++) {    // for each entry in edgebag i.e for each edge 
+    for (i = 0; i < len; i++) {  
 		ticks = 0;
 		Ck = 0;
-        for  (j = 0; j < snareLength; j++) {  // for each Molecule   
-           v = edgeBag[i].vSnare;             // Get the config of Vsnare at edge 
-           if  (v & (b1 << j))  {			  // Check if the jth molecule is present                     
-               t = edgeBag[i].tSnare;         // If jth molecule is present get config of tsnare on edge   
-               valj = edgeBag[i].jth;         // get jth Node i.e target node  
-               vali = edgeBag[i].ith;         // get ith node i.e source node
-               vt = vSnareChoicef[j];
-               result = (vt & (1 << t));   
-               if (result == 0) {   
+        for  (j = 0; j < snareLength; j++) {    
+               v = edgeBag[i].vSnare;
+               t = edgeBag[i].tSnare;
+               valj = edgeBag[i].jth;
+               vali = edgeBag[i].ith;
+          
+           if  (v & (1 << j))  {                    
+              vt = vSnareChoicef[j];    
+              result = (vt & (1 << t));   
+              if (result == 0) {   
                   edgeBag[i].zebra[ticks] = j;  
                   ticks  =  ticks + 1;
 	              fComp  =  (Tnodes[valj] & onOffMatrix[valj]);   
@@ -279,6 +313,42 @@ int main (int argc, char** argv)
          }
     }
     
+    for  (i = 0; i < N; i++){
+        printf("\n VNodes[%d] = %d" , i , Vnodes[i]);
+        printf(" TNodes[%d] = %d" , i , Tnodes[i]);
+        
+    }
+  
+  for  (i = 0; i < len; i++) {
+
+        printf("The edge No.%d has this config : \n There is an edge between graph[%d][%d]", i, edgeBag[i].ith, edgeBag[i].jth);
+        printf(" SourceNodes[%d] (v : t) = (%d , %d)" , edgeBag[i].ith , Vnodes[edgeBag[i].ith] , Tnodes[edgeBag[i].ith]);
+        printf(" TargetNodes[%d] (v : t) = (%d , %d) " , edgeBag[i].jth ,Vnodes[edgeBag[i].jth] , Tnodes[edgeBag[i].jth]);
+        printf (" vSnare =  %d \n tSnare = %d ", edgeBag[i].vSnare, edgeBag[i].tSnare);
+        printf (" combinedMask = %d \n counts = %d \n" ,edgeBag[i].combinedMask, edgeBag[i].count);
+   
+   }
+   
+    for  (i = 0; i < snareLength ; i++ ) {
+        printf(" vSnareChoicet[%d] = %d" , i, vSnareChoicet[i]);
+    }
+
+    for (j = 0; j < snareLength; j++) {
+               printf(" vSnareChoicef[%d] = %d" , j, vSnareChoicef[j]);
+    }
+    for (i = 0; i < N; i++){
+        printf(" The onOffMatrix[%d] = %d ", i, onOffMatrix[i]);
+    }
+
+    for(i = 0;i < N; i++) {
+        for(j = 0;j < N; j++) {
+           printf("Graph[%d][%d] = %d",i,j,graph[i][j]);
+        }
+     }
+    
+    printf("\nThe value of : \n C0 = %d \n C1 : %d \n C2 : %d , C3 : %d C4 : %d , C5 = %d \n",C0,C1,C2,C3, C4,C5);
+    printf(" the value of mr.Ticks is %d and len was %d ", ticks , len);    
+ 
  // assert(0);
   __CPROVER_assert(!(C0 && C1 && C2 && C3 && C4 && C5) , "Graph that satisfy friendZoned model exists");   
   return 0; 
