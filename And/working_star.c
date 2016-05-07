@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define M 6       
-#define N 3
-#define snareLength 6
-#define bigLen  8 // 2 ^ 2 ^ M
-#define len 3
+#define M 10      
+#define N 5
+#define snareLength 10
+#define bigLen  1023 // 2 ^ 2 ^ M
+#define len 10
 
 _Bool nondet_bool();
 unsigned int nondet_uint();
@@ -73,62 +73,11 @@ int main (int argc, char** argv)
     snareVector onOffMatrix[N], stCorres , ew;
   
     // Input the graph , Future plans are to make it arbitary 
-    unsigned int graph[N][N];
-    
-    //  Pre-calculate the total required length(#edges) for the containerBag
-	edgeCount = 0;
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-			if(i != j) {
-				__CPROVER_assume(graph[i][j] >= 0 && graph[i][j] <=2);
-			    if (graph[i][j] == 1)
-                    edgeCount += 1;	
-                else if (graph[i][j] == 2) 
-					edgeCount += 2;
-            }
-             else
-				__CPROVER_assume(graph[i][j] == 0); 
-
-			} 
-    }
-
-     __CPROVER_assume(edgeCount == len);
-
-    // C5 makes sure that its Graph is Strongly connected
-    C5 = 1;
-
-    for ( i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-            if ( graph[i][j] >= 1 && (i != j)) {  // if there is Direct edge we are done
-                C5 = C5 && 1;
-             }
-            else if (i != j) {  // Else case
-                unsigned int nub;  // Define max hop
-                __CPROVER_assume( nub >= 1 && (nub <= N-2));
-                unsigned int gPath[nub];
-
-                for (k = 0; k < nub; k++) {   // zdynamic N - 2 iteration
-                     gPath[k] = zeroTon(N-1);
-                 }
-                 
-                //  Make sure first edge is connected to i  and last edge is connected to j
-                if( (graph[i][gPath[0]] >= 1) && (graph[gPath[nub - 1]][j] >= 1))   
-                     C5 = C5 && 1;
-                else 
-                     C5 = 0;
-            
-             if (nub > 1) {
-               // rest Of the case is just checking edge btw consecutive array elements
-                 for (l = 0; l < nub - 1; l++) {         //Dynamic N - 3  iteration
-                       if ( graph[gPath[l]][gPath[l+1]] >= 1 ) 
-                             C5 = C5 && 1;
-                        else 
-                             C5 = 0;
-                     }
-                }
-            }
-        }
-    }
+    unsigned int graph[N][N] = {{0 , 1 , 0 , 0 , 0 },
+    {0 , 0 , 1 , 2 , 0 },
+    {1 , 1 , 0 , 0 , 0 },
+    {1 , 0 , 0 , 0 , 2 },
+    {0 , 1 , 0 , 0 , 0 }};
 
     struct EdgeBag edgeBag[len]; 
     
@@ -167,34 +116,6 @@ int main (int argc, char** argv)
          }
     }
  
-/* Graph has to be Strongly Connected +  3-Connected but not 2-Strongly connected
- Not adding this constrint as Input graph will be satisfying this Constraint*/
-// FIRST CONSTARAINT ON THE GRAPH 
-// The code for make sure that it'll be 3 connected and not four connected
- 
-        C4 = 0;
-        for ( i = 0; i < N ; i++) {
-            calc = 0;
-            for ( j = 0 ; j < len; j++) {              // 20 UNWINDINGS
-                if ( (edgeBag[j].ith == i) || (edgeBag[j].jth == i) ){
-                    calc = calc +  1;
-                }
-               }
-            __CPROVER_assume(calc >= 2);
-            if(calc < 3) {
-                C4 = 1;
-            }
-        } 
-
-    //  Edgeweight is not allowed to be zero : build C0 to represent that :
-    C0 = 1; 
-    for (j = 0; j < len; j++) {   
-         C0 = (C0 && (edgeBag[j].vSnare != 0));
-     }
-     
-      for  (i = 0; i < N; i++) {
-		   __CPROVER_assume(Vnodes[i] != 0);
-	   }
 
  C1 = 1;
    for (i = 0; i < len; i++ ) {      // For each Edge  
@@ -315,8 +236,8 @@ int main (int argc, char** argv)
   
 
     for  (i = 0; i < snareLength ; i++ ) {
-         vSnareChoicet[i] = nondetBV();
-         __CPROVER_assume( (vSnareChoicet[i] & 0b1) == 0);
+//         vSnareChoicet[i] = nondetBV();
+ //        __CPROVER_assume( (vSnareChoicet[i] & 0b1) == 0);
          vSnareChoicef[i] = nondetBV();
          __CPROVER_assume( (vSnareChoicef[i] & 0b1) == 0); 
     }
@@ -335,7 +256,7 @@ int main (int argc, char** argv)
                vali = edgeBag[i].ith;
           
            if  (v & (1 << j))  {                    
-              vt = vSnareChoicet[j];    
+              vt = vSnareChoicef[j];    
               result = (vt & (1 << t));   
               if (result == 0) {   
                   edgeBag[i].zebra[ticks] = j;  
@@ -375,44 +296,8 @@ int main (int argc, char** argv)
          }
     }
     
-    for  (i = 0; i < N; i++){
-        printf("\n VNodes[%d] = %d" , i , Vnodes[i]);
-        printf(" TNodes[%d] = %d" , i , Tnodes[i]);
-        
-    }
-  
-  for  (i = 0; i < len; i++) {
-
-        printf("The edge No.%d has this config : \n There is an edge between graph[%d][%d]", i, edgeBag[i].ith, edgeBag[i].jth);
-        printf(" SourceNodes[%d] (v : t) = (%d , %d)" , edgeBag[i].ith , Vnodes[edgeBag[i].ith] , Tnodes[edgeBag[i].ith]);
-        printf(" TargetNodes[%d] (v : t) = (%d , %d) " , edgeBag[i].jth ,Vnodes[edgeBag[i].jth] , Tnodes[edgeBag[i].jth]);
-        printf (" vSnare =  %d \n tSnare = %d ", edgeBag[i].vSnare, edgeBag[i].tSnare);
-        printf (" combinedMask = %d \n counts = %d \n" ,edgeBag[i].combinedMask, edgeBag[i].count);
-   
-   }
-   
-    for  (i = 0; i < snareLength ; i++ ) {
-        printf(" vSnareChoicet[%d] = %d" , i, vSnareChoicet[i]);
-    }
-
-    for (j = 0; j < snareLength; j++) {
-               printf(" vSnareChoicef[%d] = %d" , j, vSnareChoicef[j]);
-    }
-    for (i = 0; i < N; i++){
-        printf(" The onOffMatrix[%d] = %d ", i, onOffMatrix[i]);
-    }
-
-    for(i = 0;i < N; i++) {
-        for(j = 0;j < N; j++) {
-           printf("Graph[%d][%d] = %d",i,j,graph[i][j]);
-        }
-     }
-    
-    printf("\nThe value of : \n C0 = %d \n C1 : %d \n C2 : %d , C3 : %d C4 : %d , C5 = %d \n",C0,C1,C2,C3, C4,C5);
-    printf(" the value of mr.Ticks is %d and len was %d ", ticks , len);    
- 
  // assert(0);
-  __CPROVER_assert(!(C0 && C1 && C5 && C2 && C3 && C4) , "Graph that satisfy friendZoned model exists");   
+  __CPROVER_assert(!(C0 && C1 && C2 && C3 && C4 && C5) , "Graph that satisfy friendZoned model exists");   
   return 0; 
 }
 

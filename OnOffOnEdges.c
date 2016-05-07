@@ -10,7 +10,7 @@
 #define M 6 
 #define N 3
 #define snareLength 6
-#define len 4
+#define len 3
 
 _Bool nondet_bool();
 unsigned int nondet_uint();
