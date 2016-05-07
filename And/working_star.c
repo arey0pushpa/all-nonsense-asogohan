@@ -52,14 +52,11 @@ struct EdgeBag
 int main (int argc, char** argv)
 
 {    
-
-    unsigned  int j; 
-    unsigned int pos, i, k, l, w, x, y , iVal, jVal , g, g0,gl, lastg, ng,nl,nl2 ;
-    unsigned int edgePos, bagNo = 0, colorNode = 0 , minColor, cPos = 0 , tComp;
-    unsigned int  ticks, valj, vali , calc;
-    unsigned int  edgeCount;
-    bigVector vSnareChoicet[snareLength] , vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
-    bigVector b0 = 0b0, b1 = 0b1 ;
+    bigVector b0 = 0b0, b1 = 0b1 ; 
+    unsigned int pos, i, j , k, l, w, x, y;
+    unsigned int  ticks, valj, vali , calc, g , g0, gl, lastg, ng, nl, nl2 ; // basic use variable
+    unsigned int edgePos , edgeCount;  // Represent edge osition and assume use of edgeCount
+    unsigned int  vSnareChoicet[big], vSnareChoicef[snareLength], result, vt, vf, vl, vl2;
     _Bool Ck=0, Cf = 1, C0, C1, C2 = 1, C3 = 1, C4, C5; 
 
     bitvector Vnodes[N];
