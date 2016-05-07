@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define M 10      
-#define N 5
-#define snareLength 10
-#define bigLen  1023 // 2 ^ 2 ^ M
-#define len 10
+#define M 12      
+#define N 6
+#define snareLength 12
+#define bigLen  4096  //  2 ^ M
+#define len 12
 
 _Bool nondet_bool();
 unsigned int nondet_uint();
@@ -79,15 +79,6 @@ int main (int argc, char** argv)
     {0 , 1 , 0 , 0 , 0 }};
 
 
-        //  Pre-calculate the total required length(#edges) for the containerBag
-	edgeCount = 0;
-    for (i = 0; i < 1; i++) {
-        for (j = 0; j < 1; j++) {
-                        printf("just Chill");
-			} 
-    }
-
-
     struct EdgeBag edgeBag[len]; 
     
     //  Fill the Container values with i, j, edgeWeigth, vsnare, tsnare Values.
@@ -125,15 +116,7 @@ int main (int argc, char** argv)
          }
     }
  
-    C0 = 1; 
-    for (j = 0; j < len; j++) {   
-         C0 = (C0 && (edgeBag[j].vSnare != 0));
-     }
-     
-      for  (i = 0; i < N; i++) {
-		   __CPROVER_assume(Vnodes[i] != 0);
-	   }
-
+ 
  C1 = 1;
    for (i = 0; i < len; i++ ) {      // For each Edge  
        for (j = 0; j < snareLength; j++) {       // for each molecule               
@@ -272,16 +255,16 @@ int main (int argc, char** argv)
                valj = edgeBag[i].jth;
                vali = edgeBag[i].ith;
           
-           if  (v & (1 << j))  {                    
+           if  (v & (1 << j))  {   // whether that molecule is present or not                 
               vt = vSnareChoicef[j];    
-              result = (vt & (1 << t));   
+              result = (vt & (b1 << t));   
               if (result == 0) {   
                   edgeBag[i].zebra[ticks] = j;  
                   ticks  =  ticks + 1;
 	              fComp  =  (Tnodes[valj] & onOffMatrix[valj]);   
                   bComp  =  (Tnodes[vali] & onOffMatrix[vali]);    		  
                   vf  =  vSnareChoicef[j];    
-                  if (  (vf  & (1 << fComp ))  && ( (vf & (1 << bComp)) == 0 ))  {
+                  if (  (vf  & (b1 << fComp ))  && ( (vf & (b1 << bComp)) == 0 ))  {
                          Ck = 1 ;                                  
                   }
               }
@@ -302,7 +285,7 @@ int main (int argc, char** argv)
  			      bComp =  Tnodes[k] & onOffMatrix[k] ;   	  			       
 			      for (l = 0 ; l < edgeBag[i].count; l++) {           // THIS IS DYNAMIC CODE    
 			           vf = vSnareChoicef[edgeBag[i].zebra[l]];  
-			           if ( (vf & (1 << bComp)) == 0) {
+			           if ( (vf & (b1 << bComp)) == 0) {
                              C3 = C3 && 1;
                        }
                        else {
@@ -313,12 +296,15 @@ int main (int argc, char** argv)
          }
     }
     
+    
+   
     for  (i = 0; i < N; i++){
         printf("\n VNodes[%d] = %d" , i , Vnodes[i]);
         printf(" TNodes[%d] = %d" , i , Tnodes[i]);
         
     }
   
+  /*
   for  (i = 0; i < len; i++) {
 
         printf("The edge No.%d has this config : \n There is an edge between graph[%d][%d]", i, edgeBag[i].ith, edgeBag[i].jth);
@@ -345,12 +331,12 @@ int main (int argc, char** argv)
            printf("Graph[%d][%d] = %d",i,j,graph[i][j]);
         }
      }
-    
+    */
     printf("\nThe value of : \n C0 = %d \n C1 : %d \n C2 : %d , C3 : %d C4 : %d , C5 = %d \n",C0,C1,C2,C3, C4,C5);
     printf(" the value of mr.Ticks is %d and len was %d ", ticks , len);    
  
  // assert(0);
-  __CPROVER_assert(!(C0 && C1 && C2 && C3 && C4 && C5) , "Graph that satisfy friendZoned model exists");   
+  __CPROVER_assert(!(C1 && C2 && C3 && C4 && C5) , "Graph that satisfy friendZoned model exists");   
   return 0; 
 }
 
