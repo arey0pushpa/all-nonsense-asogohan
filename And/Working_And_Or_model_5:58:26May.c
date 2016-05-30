@@ -99,131 +99,25 @@ int  main()
           }
      }
      
+// the code s for the new Insert usaga of the mandayams rewuest to make the model scalable upto lets sy surely N  = 10.
+/*
+ *Basic idea is to iterate over all graph cuts and then able to use the fact of the mengers theorem and the strongly connectivity of the graph
+ *
+ */
+     for ( i = 0; i < len; i++) {
+
+         for ( j = 0 ; j < len; j++) 
+
+         {
+                 // encode the logic and use the fact that hoe to use the theorems to take advantage of the fact that 
+                 // mengers theorem works in this regards
+         }
+     }
+
     
-    C1 = 1;
-// No.1 : Steady State Condition For VSnares	
-   for (i = 0; i < len; i++ ) {      // For each Edge  
-       for (j = 0; j < snareLength; j++) {       // for each molecule               
-           if(edgeBag[i].vSnare & (1 << j)) {     // Present molecules   
-                vali = edgeBag[i].ith;   // store the source node
-                valj = edgeBag[i].jth;   // Store the target node
-                // If there is a back edge from taget to source we are done.
-                if (((graph[valj][vali] >= 1) && (Vedge[valj][vali] & (1 << j) )) || ((graph[valj][vali] == 2) && (Vedge2[valj][vali] & (1 << j)  )) )   {
-                      C1 = C1 && 1;
-                }
-                // Else continue checking for the cycle
-                else { 
-         		// g0 is unsigned int checks if there is an edge btw two nodes
-                //  It should be on some cycle, So assume that it'll be between 0 and N-2
-                //  As we are Only considering elementary cycles.
-                unsigned int big;
-                __CPROVER_assume( big >= 1 && big <= (N - 2));
-                 unsigned int path[big];   // An array to store the path taken by molecule.
-             
-               //  Make sure every int is between 0 and N-1 that represent the node
-                for (l = 0; l < big; l++) {           // Dynamic
-                      path[l] = zeroTon(N - 1);
-                } 
-               
-	            g0  = graph[valj][path[0]];    // g0 is unsigned int checks if there is an edge btw two nodes
-	            v0  = Vedge[valj][path[0]];    // snareVector gets the edgeweight of the corresponding edge.
-                v2  = Vedge2[valj][path[0]];
-               
-                gl  = graph[path[big - 1]][vali];
-	            vl  = Vedge[path[big - 1]][vali];    // snareVector gets the edgeweight of the corresponding edge.
-                vl2 = Vedge2[path[big - 1]][vali];
-
-               if ( ( (( g0 == 1) && (v0 & (1 << j))) ||  ( (g0 == 2) &&  ( (v0 & (1 << j)) || ( v2 & (1 << j)) ) )) &&  ((( gl == 1) && (vl & (1 << j))) ||  ( (gl == 2) &&  ( (vl & ( 1 << j)) || ( vl2 & (1 << j)) ) )))  {                  
-                   C1 = C1 && 1;
-               }
-
-               else {
-                   C1 = 0;
-               }
-           
-           
-           if ( big > 1 ) {
-               for (k = 0; k < big - 1 ; k++)  {                  // Dynamic 				    	 
-		           ng  = graph[path[k]][path[k+1]];
-		           nv  = Vedge[path[k]][path[k+1]];
-		           nv2 = Vedge2[path[k]][path[k+1]];	
-                   if ( ((ng == 1) && (nv & (1 << j))) ||  ( (ng == 2) && ((nv & (1 << j)) || (nv2 & (1 << j)))) ) {
-                           C1 = C1 && 1;
-                   }
-                   else {
-                           C1 = 0;
-                   }
-               }
-           }
-
-
-           }  // else Outside closed
-        }  // If closed
-      }  // jth for closed    
-    }   //  ith for closed 
-  
-  
-  
-// No.2 : Steady State Condition For VSnares	
-   for (i = 0; i < len; i++ ) {      // For each Edge  
-       for (j = 0; j < snareLength; j++) {       // for each molecule               
-           if(edgeBag[i].tSnare & (1 << j)) {     // Present molecules   
-                vali = edgeBag[i].ith;   // store the source node
-                valj = edgeBag[i].jth;   // Store the target node
-                
-                if (((graph[valj][vali] >= 1) && (Tedge[valj][vali] & (1 << j) ))  || ((graph[valj][vali] == 2) && (Tedge2[valj][vali] & (1 << j) )))  {
-                      C1 = C1 && 1;
-                 }
-
-                else { 
-         		// g0 is unsigned int checks if there is an edge btw two nodes
-                //  It should be on some cycle, So assume that it'll be between 0 and N-2
-                //  As we are Only considering elementary cycles.
-                unsigned int big;
-                __CPROVER_assume( big >= 1 && big <= (N - 2));
      
-                 unsigned int path[big];   // An array to store the path taken by molecule.
-             
-               //  Make sure every int is between 0 and N-1 that represent the node
-                for (l = 0; l < big; l++) {           // Dynamic
-                      path[l] = zeroTon(N - 1);
-                } 
-               
-    	        g0  = graph[valj][path[0]];    // g0 is unsigned int checks if there is an edge btw two nodes
-	            v0  = Tedge[valj][path[0]];    // snareVector gets the edgeweight of the corresponding edge.
-                v2  = Tedge2[valj][path[0]];
-               
-                gl  = graph[path[big - 1]][vali];
-	            vl  = Tedge[path[big - 1]][vali];    // snareVector gets the edgeweight of the corresponding edge.
-                vl2 = Tedge2[path[big - 1]][vali];
-
-               if ( ((( g0 == 1) && (v0 & (1 << j))) ||  ( (g0 == 2) &&  ( (v0 & ( 1 << j)) || ( v2 & (1 << j)) ) )) &&  ((( gl == 1) && (vl & (1 << j))) ||  ( (gl == 2) &&  ( (vl & ( 1 << j)) || ( vl2 & (1 << j)) ) )))  {                  
-                   C1 = C1 && 1;
-               }
-
-               else {
-                   C1 = 0;
-               }
-          if ( big > 1) {
-               for (k = 0; k < big - 1 ; k++)  {                  // Dynamic 				    	 
-		           ng  = graph[path[k]][path[k+1]];
-		           nv  = Tedge[path[k]][path[k+1]];
-		           nv2 = Tedge2[path[k]][path[k+1]];	
-                   if (((ng == 1) && (nv & (1 << j))) ||  ( (ng == 2) && ((nv & (1 << j)) || (nv2 & (1 << j))) )) {
-                           C1 = C1 && 1;
-                   }
-                   else {
-                           C1 = 0;
-                   }
-               }
-          }
-           }  // else Outside closed
-        } 
-      }  // jth for closed    
-    }   
-
-
-    for  (i = 0; i < len; i++) {
+     
+     for  (i = 0; i < len; i++) {
         centTotal = 0b0;
         total = 0b0;
         ticks = 0;
